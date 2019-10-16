@@ -52,7 +52,19 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Segmentation-Task1.py"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "OpenCV-Basics.py"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "Segmentation-AdvancedThresholding.py"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "Segmentation-Thresholding.py"
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
