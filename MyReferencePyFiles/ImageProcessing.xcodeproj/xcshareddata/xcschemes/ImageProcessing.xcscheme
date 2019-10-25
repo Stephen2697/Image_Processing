@@ -36,7 +36,7 @@
       selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/Stephen/Github/Image_Processing"
+      customWorkingDirectory = "/Users/stephen2697/Github/ImageProcessing"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
@@ -51,6 +51,22 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "Assignment1.py"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "grabCut.py"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "test.py"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "test-Canny.py"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "Segmentation-Task1.py"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -59,8 +75,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "ObjectContourExtraction.py"
+            argument = "Segmentation-AdvancedThresholding.py"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "3D_HistPlot.py"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "Segmentation-Thresholding.py"

@@ -15,10 +15,10 @@ from matplotlib import pyplot as plt
 from matplotlib import image as image
 #import easygui
 
-img = cv2.imread('Googly.jpg',0)
-ret,thresh = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
-ret,thresh2 = cv2.threshold(img,25,255,cv2.THRESH_BINARY)
-ret,thresh3 = cv2.threshold(img,50,255,cv2.THRESH_BINARY)
+img = cv2.imread('Shark 1.png',0)
+ret,thresh = cv2.threshold(img,120,255,cv2.THRESH_BINARY)
+ret,thresh2 = cv2.threshold(img,118,255,cv2.THRESH_BINARY)
+ret,thresh3 = cv2.threshold(img,122,255,cv2.THRESH_BINARY)
 ret,thresh4 = cv2.threshold(img,75,255,cv2.THRESH_BINARY)
 ret,thresh5 = cv2.threshold(img,100,255,cv2.THRESH_BINARY)
 
