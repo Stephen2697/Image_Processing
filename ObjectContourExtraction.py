@@ -1,42 +1,88 @@
 #!/usr/local/bin/python3
-#Creator: Stephen Alger C16377163
-#Assignment: 1 'Shark Attack'
+#Creator: Stephen Alger
+#Version: 1.5 'Shark Attack - Extract The Shark!'
 #Document: Assignment1.py
 #Start-Date:  10-OCT-2019
-#Shark Image Extractor using Analysis
+#Object Image Extractor using Image Processing Techniques such as Hist Equalisation, Colour Space Manipulation, Thresholding and Contouring.
 
 #Import Modules...
 import sys, os, cv2, numpy as np, matplotlib
 matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import *
+from matplotlib import pyplot as plt
+import easygui
 
-#-------Get Input File from user
-#Incompatible with my system, easygui acting up too, manaul input unfortunately
-#root = tk.Tk()
-#root.withdraw()
-#file_path = filedialog.askopenfilename()
+FILE_PATH = "./InputImages/"
+FILE_OUT_NAME = "_EXTRACT"
+FILE_OUT_PATH = "./OutputImages/"
+SAMPLE_SCRIPT_RUN = "python3 ObjectContourExtraction.py 'Shark 1.PNG'"
 
-file_path = "Shark 1.png"
-print(file_path)
+#------Little bit of clean up
+def clear():
+    os.system('cls' if os.name=='nt' else 'clear')
 
-#------Error Handling
+clear()
 
-if not (file_path.endswith('.png') or file_path .endswith('.PNG ')):
-	print("Analyser Error - File must be PNG or JPEG")
+if sys.version_info[0]<3 :
+    print("PYTHON 3 MINIMUM REQUIRED")
+    exit()
+
+#------Error In Arg Handling & File Input
+ACCEPTED_FILETYPE = [".PNG",".png"]
+
+#JPEG Removed & To Be readded - causing buggy behaviour
+#ACCEPTED_FILETYPE = [".PNG",".png",".JPEG",".jpeg",".JPG",".jpg"]
+
+ERROR_FILE_TYPE = True
+
+#Check Number of Arguments
+if len(sys.argv) == 2:
+	for filetype in range(len(ACCEPTED_FILETYPE)) :
+		if sys.argv[1].endswith(ACCEPTED_FILETYPE[filetype]):
+			ERROR_FILE_TYPE = False
+			
+#			Save filetype for debug purposes
+			ACCEPTED_FILETYPE = ACCEPTED_FILETYPE[filetype]
+			break
+			
+	if ERROR_FILE_TYPE == True:
+		print("File Type Selected is Not Supported (PNG only)")
+#		print("File Type Selected is Not Supported (JPEG/PNG only)")
+		exit()
+else:
+	print("Re-run This Script as follows: [ObjectExtraction.py] ['FileName.fileExtension']")
+	print("Try: " + SAMPLE_SCRIPT_RUN)
 	exit()
+
+
+#FILE_NAME = "Shark 1.PNG"
+FILE_NAME = sys.argv[1]
+FILE_LOC = FILE_PATH + FILE_NAME
+print("Loading File... [" + FILE_LOC + "]")
+
+
+#-------GUI Input Method - Buggy & Commented Out
 	
+#version = str(tk.TkVersion)
+#print("TK Version: [" + version + "]")
+	
+#Temperamental EASUGUI - to be added again - issues with deprecated tkinter
+#FILE_LOC = str(easygui.fileopenbox(msg="Please Select An Image to Analyse", title="Image Selector", default=FILE_PATH, filetypes=[["*.png","*.PNG", "PNG files"], ["*.jpeg", "*.jpg","*.JPEG", "JPEG files"]]))
+
+
+
 #-------User Prompt
 
 print("Welcome to my Foreground and Background Analyser")
-print("Please use the slider to line up the White crosshairs with your object to make a selection")
+print("Please use the slider in the pop-up window to line up the White crosshairs with your object to make a selection")
 
-winName = "Shark Analysis"
+winName = "Image Contour Analysis"
 
 #-------Global Variables & Initialisation
-src = dst = targetMask = brightness = cv2.imread(file_path)
+src = cv2.imread(FILE_LOC)
+
+dst = targetMask = brightness = src
+
 dst = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
 hue,saturation,brightness = cv2.split(dst)
 
@@ -55,7 +101,9 @@ def imageAnalyser(val):
 #	-----Stage 1: Add the Gassian Blur and Histogram Equalisation - contast stretching
 	if (blursSize >= 3):
 		blursSize += (1 - blursSize % 2)
+		
 		tempMatrix	= cv2.GaussianBlur(tempMatrix, (blursSize, blursSize), 0)
+		
 	if (useEqualise):
 		tempMatrix = cv2.equalizeHist(tempMatrix)
 
@@ -153,10 +201,10 @@ def bitwiseSubtractor():
 	cv2.imshow("Post Erosion Phase", erosionPhase)
 	cv2.waitKey(0)
 	
-#	Viola! You've Got your shark - hopefully!
+#	Destination Image extracted...
+	dst = erosionPhase
 
-
-#-------Analyser Output & Trackbar setup with Callbacks to each above function
+#-------Trackbar setup with Callbacks to each above function
 cv2.namedWindow(winname = winName, flags = cv2.WINDOW_NORMAL)
 #cv.CreateTrackbar(trackbarName, windowName, value, count, onChange)
 cv2.createTrackbar("Equalise", winName, useEqualise, 1, adjustEqualise)
@@ -167,15 +215,30 @@ cv2.createTrackbar("Threshold", winName, threshold, 255, adjustThreshold)
 imageAnalyser(0)
 cv2.waitKey(delay = 0)
 
+#Cut out the Contoured Object...
 bitwiseSubtractor()
+#Viola! You've Got your shark - hopefully!
+
+
+
+#Format Output Name file based on input filename
+tmpName = sys.argv[1].split(ACCEPTED_FILETYPE)
+tmpName[len(tmpName)-2]+= FILE_OUT_NAME
+FILE_OUT_NAME = tmpName[len(tmpName)-2] + ACCEPTED_FILETYPE
+
+
+#File location now refers to output file not input
+FILE_LOC = FILE_OUT_PATH + FILE_OUT_NAME
+print("Your Extraction Image Has Been Saved To File @ [" + FILE_LOC + "]")
+cv2.imwrite(FILE_LOC, dst)
+
+cv2.destroyAllWindows()
 
 exit()
 
 
 	
 	
-
-
 
 
 
