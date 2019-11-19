@@ -15,7 +15,7 @@ import easygui
 FILE_PATH = "./InputImages/"
 FILE_OUT_NAME = "_EXTRACT"
 FILE_OUT_PATH = "./OutputImages/"
-SAMPLE_SCRIPT_RUN = "python3 ObjectContourExtraction.py 'Shark 1.PNG'"
+SAMPLE_SCRIPT_RUN = "python3 ObjectContourExtraction.py 'Shark 2.PNG'"
 
 #------Little bit of clean up
 def clear():
@@ -88,28 +88,40 @@ hue,saturation,brightness = cv2.split(dst)
 
 #-------Default parameter settings as rough guide
 useEqualise = 1
-blursSize = 21
-threshold = int(33.0 * 255 / 100)
+blurSize = 38
+#threshold = int(33.0 * 255 / 100)
+threshold = 98
+blocksize = 11
+offset = 11
+
 
 #--------Function to let user analyse the thresholding process using sliders to add blur, equalisation and the threshold value to avoid artibrary hardcoding
 def imageAnalyser(val):
 
-	global useEqualise, blursSize, threshold, dst, src
+	global useEqualise, blurSize, threshold, dst, src, blocksize,offset
 	tempMatrix = brightness
 	np.copyto(tempMatrix, brightness)
 
 #	-----Stage 1: Add the Gassian Blur and Histogram Equalisation - contast stretching
-	if (blursSize >= 3):
-		blursSize += (1 - blursSize % 2)
+
+	#Blocksize cant be even
+	if (blocksize > 1 and (blocksize%2==0)):
+		blocksize -= 1
+	
+	if (blurSize<8):
+		blurSize = 8
 		
-		tempMatrix	= cv2.GaussianBlur(tempMatrix, (blursSize, blursSize), 0)
-		
+	if (blurSize >= 3):
+		blurSize = blurSize + (1 - blurSize % 2)
+		tempMatrix	= cv2.GaussianBlur(tempMatrix, (blurSize, blurSize), 0)
+
 	if (useEqualise):
 		tempMatrix = cv2.equalizeHist(tempMatrix)
 
 #    ------Apply threshold with slider settings - BINARY INVERSE Global Threshold
-	ret1, tempMatrix = cv2.threshold(tempMatrix,threshold,255, cv2.THRESH_BINARY_INV)
+#	ret1, tempMatrix = cv2.threshold(tempMatrix,threshold,255, cv2.THRESH_BINARY_INV)
 	
+	tempMatrix = cv2.adaptiveThreshold(tempMatrix,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,255,4)
 	
 #	-------Design Using Adaptive Threshold Mean removed as it involves far too much hardcoding before useful in any portable way
 #	tempMatrix = cv2.adaptiveThreshold(tempMatrix,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,11)
@@ -147,7 +159,9 @@ def imageAnalyser(val):
 		cv2.drawContours(dst, contours, largest, colour, -1)
 
 	
-	cv2.imshow(winName, dst)
+#	cv2.imshow(winName, dst)
+	
+#def selectCountour(contour):
 	
 
 #-----Callbacks on slider value update
@@ -155,12 +169,12 @@ def adjustEqualise(E):
 	global useEqualise
 	useEqualise = E
 	boolE = bool(E)
-	print("Threshold value is ["+ str(threshold) + "], Equalise value is ["+ str(E) + "], Gaussian Blur Size value is ["+ str(blursSize) + "]")
+	print("Threshold value is ["+ str(threshold) + "], Equalise value is ["+ str(E) + "], Gaussian Blur Size value is ["+ str(blurSize) + "]")
 	imageAnalyser(0)
 	
 def adjustBlur(B):
-	global blursSize
-	blursSize = B
+	global blurSize
+	blurSize = B
 	boolE = bool(useEqualise)
 	print("Threshold value is ["+ str(threshold) + "], Equalise value is ["+ str(boolE) + "], Gaussian Blur Size value is ["+ str(B) + "]")
 	imageAnalyser(0)
@@ -169,10 +183,51 @@ def adjustThreshold(T):
 	global threshold
 	threshold = T
 	boolE = bool(useEqualise)
-	print("Threshold value is ["+ str(T) + "], Equalise value is ["+ str(boolE) + "], Gaussian Blur Size value is ["+ str(blursSize) + "]")
+	print("Threshold value is ["+ str(T) + "], Equalise value is ["+ str(boolE) + "], Gaussian Blur Size value is ["+ str(blurSize) + "]")
+	imageAnalyser(0)
+	
+def adjustBlocksize(Blocksize):
+	global blocksize
+	blocksize = Blocksize
+	imageAnalyser(0)
+	
+def adjustOffset(Offset):
+	global offset
+	offset = Offset
 	imageAnalyser(0)
 
+def cropMaskToROI():
+	#Our dst image represents our contoured object
+	#now we want to crop to this image and re contour
+	global dst
+	_,_,MASKROI = cv2.split(dst)
 
+	
+	cv2.imshow("MASKROI", MASKROI)
+	cv2.waitKey(0)
+	
+	## Calculates and returns point x, y, height and width of the shark in the mask
+	(x,y,w,h) = cv2.boundingRect(MASKROI)
+	print(x, y, w, h)
+	
+	#### Cropping the image to Shark co-ordinates ####
+	x=x-25
+	y=y-25
+	w=x+w+25
+	h=y+h+25
+
+	if x<=0:
+		x=25
+
+	if y<=0:
+		y=25
+
+	#Final Image
+	C = MASKROI[y:h, x:w]
+	print(x, y, w, h)
+	cv2.imshow("Cropped", C)
+	cv2.waitKey(0)
+	
 def bitwiseSubtractor():
 	global dst, src
 
@@ -208,17 +263,21 @@ def bitwiseSubtractor():
 cv2.namedWindow(winname = winName, flags = cv2.WINDOW_NORMAL)
 #cv.CreateTrackbar(trackbarName, windowName, value, count, onChange)
 cv2.createTrackbar("Equalise", winName, useEqualise, 1, adjustEqualise)
-cv2.createTrackbar("Blur Sigma", winName, blursSize, 100, adjustBlur)
-cv2.createTrackbar("Threshold", winName, threshold, 255, adjustThreshold)
+cv2.createTrackbar("Blur Sigma", winName, blurSize, 100, adjustBlur)
+#cv2.createTrackbar("Threshold", winName, threshold, 255, adjustThreshold)
+#cv2.createTrackbar("Blocksize", winName, threshold, 255, adjustBlocksize)
+#cv2.createTrackbar("Offset", winName, threshold, 255, adjustOffset)
 
 #Call the functions!
 imageAnalyser(0)
 cv2.waitKey(delay = 0)
 
+
+#cropMaskToROI()
+
 #Cut out the Contoured Object...
 bitwiseSubtractor()
 #Viola! You've Got your shark - hopefully!
-
 
 
 #Format Output Name file based on input filename
