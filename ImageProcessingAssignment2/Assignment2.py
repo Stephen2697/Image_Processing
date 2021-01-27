@@ -7,8 +7,8 @@
 
 #------IMPORT MODULES
 import sys, os, cv2, numpy as np, matplotlib
-#matplotlib.use("TkAgg")
-matplotlib.use("macOSX")
+matplotlib.use("TkAgg")
+#matplotlib.use("macOSX")
 import tkinter as tk
 from matplotlib import pyplot as plt
 
@@ -23,7 +23,7 @@ ACCEPTED_FILETYPE = [".PNG",".png",".JPEG",".jpeg",".JPG",".jpg"]
 
 #CHOOSE INPUT FILE HERE!!!
 #-------
-FILE_NAME = FILE_NAME_ARRAY[2]
+FILE_NAME = FILE_NAME_ARRAY[1]
 #-------
 
 
